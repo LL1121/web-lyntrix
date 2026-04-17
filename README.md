@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lyntrix — Technology Studio
+
+Landing page for **Lyntrix**, a technology studio specializing in AI solutions, high-fidelity web development, and scalable cloud architecture.
+
+## Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Styling**: Tailwind CSS v4
+- **Animations**: Framer Motion + GSAP
+- **Smooth Scroll**: Lenis
+- **Language**: TypeScript
+- **Icons**: Lucide React
+
+## Pages
+
+| Route | Description |
+|---|---|
+| `/` | Hero + Manifesto + CTA |
+| `/work` | Services + Portfolio |
+| `/contact` | Contact form |
+
+## Key Features
+
+- **Particle logo transition** — the brand mark in the hero disintegrates into data particles that stream to the navbar and crystallize into the wordmark on scroll
+- **Multi-page architecture** — 3 dedicated pages with smooth page transitions
+- **Irresistible CTAs** — magnetic buttons with cursor-tracking glow, animated counters, urgency badges
+- **Bento grid services** — interactive cards with hover micro-interactions
+- **Horizontal scroll vault** — portfolio with scroll hijacking (vertical → horizontal → vertical)
+- **Manifesto section** — word-by-word scroll-triggered text illumination
+- **Particle canvas background** — connected dot network in the hero
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── page.tsx          # Home
+│   ├── work/page.tsx     # Portfolio & Services
+│   ├── contact/page.tsx  # Contact
+│   ├── layout.tsx
+│   └── template.tsx      # Page transitions
+├── components/
+│   ├── Hero.tsx
+│   ├── Manifesto.tsx
+│   ├── Services.tsx
+│   ├── Vault.tsx
+│   ├── Contact.tsx
+│   ├── Navbar.tsx
+│   ├── Footer.tsx
+│   ├── LogoParticleTransition.tsx
+│   ├── PageCTAWork.tsx
+│   ├── PageCTAContact.tsx
+│   └── MagneticButton.tsx
+└── lib/
+    ├── logo-refs.ts
+    └── utils.ts
+```
 
-## Learn More
+## Deploy
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Optimized for deployment on [Vercel](https://vercel.com).
