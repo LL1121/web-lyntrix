@@ -81,13 +81,13 @@ export default function PageCTAContact() {
           Let&apos;s build something that dominates your market.
         </motion.p>
 
-        {/* CTA buttons */}
+        {/* CTA button */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          style={{ display: "flex", gap: "16px", justifyContent: "flex-end", flexWrap: "wrap", marginBottom: "56px" }}
+          style={{ display: "flex", justifyContent: "center", marginBottom: "56px", marginTop: "-12px" }}
         >
           <MagneticButton href="/contact" size="lg">
             Start a project

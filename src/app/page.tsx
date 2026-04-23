@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Hero from "@/components/Hero";
 import Manifesto from "@/components/Manifesto";
 import PageCTAWork from "@/components/PageCTAWork";
+import Footer from "@/components/Footer";
 
 const LogoParticleTransition = dynamic(
   () => import("@/components/LogoParticleTransition"),
@@ -18,6 +19,7 @@ export default function Home() {
         <Hero />
         <Manifesto />
         <PageCTAWork />
+        <Footer />
       </main>
     </>
   );

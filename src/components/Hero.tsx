@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { heroLogoRef } from "@/lib/logo-refs";
+import MagneticButton from "@/components/MagneticButton";
 
 const letterAnimation = {
   hidden: { opacity: 0, y: 34, rotateX: -50 },
@@ -270,63 +271,16 @@ export default function Hero() {
           className="mt-24 flex flex-col items-center gap-4 sm:flex-row"
           style={{ marginTop: "30px" }}
         >
-          <a
-            href="/work"
-            className="hover:opacity-95"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              padding: "14px 36px",
-              borderRadius: "999px",
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "white",
-              textDecoration: "none",
-              background: "linear-gradient(135deg, #00D2FF, #3a7bd5)",
-              transition: "opacity 0.25s ease, filter 0.25s ease",
-              flexShrink: 0,
-              filter: "saturate(1)",
-            }}
-          >
+          <MagneticButton href="/work">
             Let&apos;s talk
-          </a>
+          </MagneticButton>
 
-          <a
-            href="/work"
-            className="hover:text-white"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "14px 32px",
-              borderRadius: "999px",
-              fontSize: "14px",
-              fontWeight: 500,
-              color: "rgba(255,255,255,0.65)",
-              textDecoration: "none",
-              border: "1px solid rgba(255,255,255,0.12)",
-              transition: "border-color 0.25s ease, color 0.25s ease, background 0.25s ease",
-              flexShrink: 0,
-              background: "rgba(255,255,255,0.01)",
-            }}
-            onMouseEnter={(e) => {
-              const el = e.currentTarget as HTMLAnchorElement;
-              el.style.borderColor = "rgba(255,255,255,0.2)";
-              el.style.color = "white";
-              el.style.background = "rgba(255,255,255,0.03)";
-            }}
-            onMouseLeave={(e) => {
-              const el = e.currentTarget as HTMLAnchorElement;
-              el.style.borderColor = "rgba(255,255,255,0.12)";
-              el.style.color = "rgba(255,255,255,0.65)";
-              el.style.background = "rgba(255,255,255,0.01)";
-            }}
-          >
+          <MagneticButton href="/work" variant="secondary">
             View our work
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
-          </a>
+          </MagneticButton>
         </motion.div>
       </motion.div>
 

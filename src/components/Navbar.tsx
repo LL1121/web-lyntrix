@@ -188,14 +188,16 @@ export default function Navbar() {
               flexShrink: 0,
               opacity: ctaOp,
               y: ctaY,
+              transition: "opacity 0.22s ease, filter 0.22s ease",
+              filter: "saturate(1)",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 0 24px rgba(0,210,255,0.4)";
-              (e.currentTarget as HTMLAnchorElement).style.opacity = "0.9";
+              (e.currentTarget as HTMLAnchorElement).style.opacity = "0.92";
+              (e.currentTarget as HTMLAnchorElement).style.filter = "saturate(1.04)";
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none";
               (e.currentTarget as HTMLAnchorElement).style.opacity = "1";
+              (e.currentTarget as HTMLAnchorElement).style.filter = "saturate(1)";
             }}
           >
             Start a project

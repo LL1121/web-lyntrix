@@ -21,14 +21,15 @@ export default function MagneticButton({
   const ref = useRef<HTMLAnchorElement>(null);
   const x   = useMotionValue(0);
   const y   = useMotionValue(0);
-  const xS  = useSpring(x, { stiffness: 180, damping: 14, mass: 0.6 });
-  const yS  = useSpring(y, { stiffness: 180, damping: 14, mass: 0.6 });
+  const xS  = useSpring(x, { stiffness: 220, damping: 24, mass: 0.9 });
+  const yS  = useSpring(y, { stiffness: 220, damping: 24, mass: 0.9 });
 
   const handleMove = (e: React.MouseEvent) => {
     const r = ref.current?.getBoundingClientRect();
     if (!r) return;
-    x.set((e.clientX - r.left - r.width  / 2) * 0.32);
-    y.set((e.clientY - r.top  - r.height / 2) * 0.32);
+    // Keep a subtle magnetic response to avoid exaggerated motion.
+    x.set((e.clientX - r.left - r.width  / 2) * 0.12);
+    y.set((e.clientY - r.top  - r.height / 2) * 0.12);
   };
 
   const handleLeave = () => { x.set(0); y.set(0); };
@@ -56,6 +57,7 @@ export default function MagneticButton({
         ...(variant === "primary"
           ? { background: "linear-gradient(135deg, #00D2FF, #3a7bd5)", color: "white" }
           : { border: "1px solid rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.8)", background: "rgba(255,255,255,0.04)" }),
+        transition: "opacity 0.22s ease, border-color 0.22s ease, background 0.22s ease, color 0.22s ease",
         ...style,
       } as React.CSSProperties & { x: typeof xS; y: typeof yS }}
       onMouseMove={handleMove}
@@ -63,13 +65,29 @@ export default function MagneticButton({
       onMouseEnter={(e) => {
         const el = e.currentTarget as HTMLAnchorElement;
         if (variant === "primary") {
-          el.style.boxShadow = "0 0 55px rgba(0,210,255,0.45), 0 0 22px rgba(58,123,213,0.3)";
+          el.style.opacity = "0.92";
+          el.style.filter = "saturate(1.04)";
         } else {
-          el.style.borderColor = "rgba(0,210,255,0.4)";
+          el.style.borderColor = "rgba(255,255,255,0.24)";
           el.style.color = "white";
+          el.style.background = "rgba(255,255,255,0.08)";
         }
       }}
-      whileTap={{ scale: 0.96 }}
+      onMouseUp={handleLeave}
+      onMouseDown={handleMove}
+      onMouseOut={(e) => {
+        const el = e.currentTarget as HTMLAnchorElement;
+        if (variant === "primary") {
+          el.style.opacity = "1";
+          el.style.filter = "saturate(1)";
+        } else {
+          el.style.borderColor = "rgba(255,255,255,0.14)";
+          el.style.color = "rgba(255,255,255,0.8)";
+          el.style.background = "rgba(255,255,255,0.04)";
+        }
+      }}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.985 }}
     >
       {children}
     </motion.a>

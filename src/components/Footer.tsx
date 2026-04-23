@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { useRef } from "react";
 const XIcon = () => (
   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.75l7.733-8.835L1.254 2.25H8.08l4.26 5.632L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
@@ -27,13 +28,42 @@ const socials: { label: string; icon: () => React.JSX.Element; href: string }[] 
 ];
 
 export default function Footer() {
+  const year = new Date().getFullYear();
+  const footerRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: footerRef,
+    offset: ["start end", "end end"],
+  });
+  const revealY = useSpring(useTransform(scrollYProgress, [0, 1], [68, -8]), {
+    stiffness: 90,
+    damping: 24,
+    mass: 0.9,
+  });
+  const revealOpacity = useSpring(useTransform(scrollYProgress, [0, 0.55, 1], [0, 0.82, 1]), {
+    stiffness: 95,
+    damping: 26,
+    mass: 0.9,
+  });
+  const revealScale = useSpring(useTransform(scrollYProgress, [0, 1], [0.985, 1]), {
+    stiffness: 100,
+    damping: 28,
+    mass: 0.9,
+  });
+
   return (
-    <footer
-      className="relative py-14"
+    <motion.footer
+      ref={footerRef}
+      className="relative"
       style={{
-        borderTop: "1px solid rgba(255,255,255,0.06)",
+        marginTop: "56px",
+        padding: "56px 0 44px",
+        borderTop: "1px solid rgba(255,255,255,0.08)",
         background:
-          "linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.005) 18%, transparent 100%)",
+          "linear-gradient(180deg, rgba(255,255,255,0.015) 0%, rgba(255,255,255,0.004) 28%, transparent 100%)",
+        y: revealY,
+        opacity: revealOpacity,
+        scale: revealScale,
+        transformOrigin: "center bottom",
       }}
     >
       <div
@@ -49,85 +79,117 @@ export default function Footer() {
           pointerEvents: "none",
         }}
       />
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div
-          className="flex flex-col items-center justify-between gap-6 rounded-2xl px-5 py-5 sm:flex-row sm:px-6"
-          style={{
-            border: "1px solid rgba(255,255,255,0.06)",
-            background: "rgba(255,255,255,0.015)",
-            backdropFilter: "blur(8px)",
-          }}
-        >
-          <div className="flex items-center gap-8">
-            <span className="text-lg font-bold tracking-tight text-white">
-              Lyn
-              <span
+      <div
+        className="mx-auto w-full max-w-none"
+        style={{ padding: "30px clamp(22px, 4vw, 56px) 0" }}
+      >
+          <div
+            className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end"
+            style={{
+              borderBottom: "1px solid rgba(255,255,255,0.08)",
+              paddingBottom: "14px",
+            }}
+          >
+            <div>
+              <div
                 style={{
-                  background: "linear-gradient(135deg, #00D2FF, #3a7bd5)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
+                  fontSize: "26px",
+                  fontWeight: 800,
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1,
+                  color: "white",
                 }}
               >
-                trix
-              </span>
-            </span>
-            <span className="text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>
-              &copy; {new Date().getFullYear()} All rights reserved.
-            </span>
+                Lyn
+                <span
+                  style={{
+                    background: "linear-gradient(135deg, #00D2FF, #3a7bd5)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}
+                >
+                  trix
+                </span>
+              </div>
+              <p
+                style={{
+                  marginTop: "12px",
+                  maxWidth: "520px",
+                  fontSize: "14px",
+                  lineHeight: 1.7,
+                  color: "rgba(255,255,255,0.42)",
+                }}
+              >
+                We design and engineer high-fidelity digital products for teams that need speed,
+                clarity, and measurable business impact.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {socials.map(({ label, icon: Icon, href }) => (
+                <motion.a
+                  key={label}
+                  href={href}
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.98 }}
+                  aria-label={label}
+                  className="flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300"
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.14)",
+                    background: "rgba(255,255,255,0.03)",
+                    color: "rgba(255,255,255,0.52)",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.color = "white";
+                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,210,255,0.45)";
+                    (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,210,255,0.10)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.52)";
+                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.14)";
+                    (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.03)";
+                  }}
+                >
+                  <Icon />
+                </motion.a>
+              ))}
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            {socials.map(({ label, icon: Icon, href }) => (
-              <motion.a
-                key={label}
-                href={href}
-                whileHover={{ scale: 1.04 }}
-                aria-label={label}
-                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-300"
-                style={{
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  background: "rgba(255,255,255,0.02)",
-                  color: "rgba(255,255,255,0.35)",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.7)";
-                  (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,210,255,0.34)";
-                  (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,210,255,0.08)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.35)";
-                  (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.07)";
-                  (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.02)";
-                }}
-              >
-                <Icon />
-              </motion.a>
-            ))}
-          </div>
-        </div>
+          <div
+            className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+            style={{ marginTop: "70px" }}
+          >
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
+                <a
+                  key={item}
+                  href="#"
+                  className="text-xs transition-colors duration-300 hover:text-white/75"
+                  style={{ color: "rgba(255,255,255,0.34)" }}
+                >
+                  {item}
+                </a>
+              ))}
+            </div>
 
-        <div
-          className="mt-10 pt-8 flex flex-col items-center justify-between gap-4 sm:flex-row"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
-        >
-          <div className="flex flex-wrap justify-center gap-6 sm:justify-start">
-            {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="text-xs transition-colors duration-300 hover:text-white/60"
-                style={{ color: "rgba(255,255,255,0.2)" }}
-              >
-                {item}
-              </a>
-            ))}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                fontSize: "12px",
+                color: "rgba(255,255,255,0.3)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <span>© {year} Lyntrix</span>
+              <span style={{ opacity: 0.35 }}>•</span>
+              <span>Crafted with precision.</span>
+            </div>
           </div>
-          <span className="text-xs" style={{ color: "rgba(255,255,255,0.15)" }}>
-            Crafted with precision.
-          </span>
-        </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 }
