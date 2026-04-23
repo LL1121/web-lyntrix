@@ -35,34 +35,6 @@ export default function PageCTAContact() {
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: "linear-gradient(to right, transparent, rgba(58,123,213,0.3), rgba(0,210,255,0.3), rgba(58,123,213,0.3), transparent)" }} />
 
       <div className="mx-auto max-w-5xl px-6 lg:px-8" style={{ textAlign: "center" }}>
-        {/* Urgency badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
-          style={{ marginBottom: "28px" }}
-        >
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "8px 20px",
-              borderRadius: "999px",
-              fontSize: "12px",
-              fontWeight: 600,
-              border: "1px solid rgba(0,210,255,0.25)",
-              background: "rgba(0,210,255,0.06)",
-              color: "rgba(0,210,255,0.9)",
-              letterSpacing: "0.03em",
-            }}
-          >
-            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#00D2FF", display: "inline-block", animation: "pulse 2s infinite" }} />
-            2 project slots available — Q3 2025
-          </span>
-        </motion.div>
-
         {/* Headline */}
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -115,16 +87,13 @@ export default function PageCTAContact() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginBottom: "56px" }}
+          style={{ display: "flex", gap: "16px", justifyContent: "flex-end", flexWrap: "wrap", marginBottom: "56px" }}
         >
           <MagneticButton href="/contact" size="lg">
             Start a project
             <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
-          </MagneticButton>
-          <MagneticButton href="/contact" variant="secondary" size="lg">
-            Schedule a call
           </MagneticButton>
         </motion.div>
 

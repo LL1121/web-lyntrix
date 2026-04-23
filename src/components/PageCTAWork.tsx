@@ -74,7 +74,7 @@ export default function PageCTAWork() {
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: "linear-gradient(to right, transparent, rgba(0,210,255,0.2), transparent)" }} />
 
       {/* Stats row */}
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8" style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -82,9 +82,11 @@ export default function PageCTAWork() {
           transition={{ duration: 0.5 }}
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-            gap: "2px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+            gap: "12px",
             marginBottom: "80px",
+            maxWidth: "760px",
+            margin: "0 auto 80px",
           }}
         >
           {stats.map((s, i) => (
@@ -130,7 +132,7 @@ export default function PageCTAWork() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          style={{ textAlign: "center", marginBottom: "24px" }}
+          style={{ textAlign: "center", marginBottom: "24px", width: "100%", maxWidth: "760px", marginInline: "auto" }}
         >
           <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.25em", color: "#00D2FF", textTransform: "uppercase", display: "block", marginBottom: "20px" }}>
             The Work
@@ -169,13 +171,13 @@ export default function PageCTAWork() {
         </motion.div>
 
         {/* Auto-scrolling project strip */}
-        <div style={{ marginTop: "64px", overflow: "hidden", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }}>
+        <div style={{ marginTop: "64px", overflow: "hidden", width: "100%", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }}>
           <motion.div
             animate={{ x: ["0%", "-50%"] }}
-            transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
-            style={{ display: "flex", gap: "16px", width: "max-content" }}
+            transition={{ duration: 28, repeat: Infinity, ease: "linear", repeatType: "loop" }}
+            style={{ display: "flex", gap: "16px", width: "max-content", justifyContent: "center", marginInline: "auto" }}
           >
-            {[...projects, ...projects].map((p, i) => (
+            {[...projects, ...projects, ...projects].map((p, i) => (
               <div
                 key={i}
                 style={{

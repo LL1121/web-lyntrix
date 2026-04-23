@@ -5,30 +5,43 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { heroLogoRef } from "@/lib/logo-refs";
 
 const letterAnimation = {
-  hidden: { opacity: 0, y: 80, rotateX: -90 },
+  hidden: { opacity: 0, y: 34, rotateX: -50 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
     rotateX: 0,
     transition: {
-      duration: 0.8,
-      delay: 0.8 + i * 0.04,
-      ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
+      duration: 0.34,
+      delay: i * 0.018,
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
     },
   }),
 };
 
-const LOGO_LETTER_INDEX = 6; // "l" in "We build the"
+const futureAnimation = {
+  hidden: { opacity: 0, y: 24, rotateX: -35, scale: 0.98 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    rotateX: 0,
+    scale: 1,
+    transition: {
+      duration: 0.32,
+      delay: 0.14 + i * 0.022,
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
+    },
+  }),
+};
+
+const LOGO_LETTER_INDEX = 6; // "L" in "We build the"
 
 export default function Hero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
   const { scrollY } = useScroll();
-  // Sync with particle disintegration timing
-  const heroLogoOpacity  = useTransform(scrollY, [20, 85], [1, 0]);
-  // "build" letters (b=3, u=4, i=5, d=7) dissolve alongside the logo
-  const buildLetterOp    = useTransform(scrollY, [20, 90], [1, 0]);
-  const buildLetterY     = useTransform(scrollY, [20, 90], [0, -12]);
-  const DISSOLVE_INDICES = new Set([3, 4, 5, 7]);
+  const heroLogoOpacity = useTransform(scrollY, [20, 85], [1, 0]);
+  const headlineTop = "We build the";
+  const headlineBottom = "future.";
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -38,7 +51,12 @@ export default function Hero() {
 
     let animationId: number;
     const particles: {
-      x: number; y: number; vx: number; vy: number; size: number; opacity: number;
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      size: number;
+      opacity: number;
     }[] = [];
 
     const resize = () => {
@@ -62,7 +80,8 @@ export default function Hero() {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach((p) => {
-        p.x += p.vx; p.y += p.vy;
+        p.x += p.vx;
+        p.y += p.vy;
         if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
         if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
         ctx.beginPath();
@@ -70,31 +89,32 @@ export default function Hero() {
         ctx.fillStyle = `rgba(0, 210, 255, ${p.opacity})`;
         ctx.fill();
       });
+
       particles.forEach((a, i) => {
         particles.slice(i + 1).forEach((b) => {
-          const dx = a.x - b.x, dy = a.y - b.y;
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 150) {
             ctx.beginPath();
-            ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
             ctx.strokeStyle = `rgba(0, 210, 255, ${0.06 * (1 - dist / 150)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
         });
       });
+
       animationId = requestAnimationFrame(animate);
     };
-    animate();
 
+    animate();
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener("resize", resize);
     };
   }, []);
-
-  const headlineTop = "We build the";
-  const headlineBottom = "future.";
 
   return (
     <section
@@ -104,27 +124,41 @@ export default function Hero() {
       <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-40" />
       <div
         className="absolute left-1/2 top-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px] pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(0,210,255,0.07) 0%, rgba(58,123,213,0.04) 60%, transparent 100%)" }}
+        style={{
+          background:
+            "radial-gradient(circle, rgba(0,210,255,0.07) 0%, rgba(58,123,213,0.04) 60%, transparent 100%)",
+        }}
       />
 
-      <div className="relative z-10 flex flex-col items-center text-center">
-        {/* Badge */}
+      <motion.div
+        className="relative z-10 flex flex-col items-center text-center"
+        initial={{ opacity: 0, y: 14, scale: 1.02, filter: "blur(8px)" }}
+        animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        style={{ pointerEvents: "auto" }}
+      >
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
+          transition={{ duration: 0.34, delay: 0.1 }}
           className="mb-6"
         >
           <span
             className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium tracking-wider uppercase backdrop-blur-sm"
-            style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.5)" }}
+            style={{
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: "rgba(255,255,255,0.03)",
+              color: "rgba(255,255,255,0.5)",
+            }}
           >
-            <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#00D2FF" }} />
+            <span
+              className="h-1.5 w-1.5 rounded-full animate-pulse"
+              style={{ background: "#00D2FF" }}
+            />
             AI-Powered Solutions
           </span>
         </motion.div>
 
-        {/* Headline */}
         <h1 className="text-5xl font-bold leading-[1.05] tracking-tight sm:text-7xl md:text-8xl lg:text-9xl">
           <span className="block overflow-hidden" style={{ perspective: "1000px" }}>
             {headlineTop.split("").map((char, i) => {
@@ -138,48 +172,43 @@ export default function Hero() {
                     animate="visible"
                     style={{ display: "inline-block", transformOrigin: "bottom", opacity: heroLogoOpacity }}
                   >
-                    <span
+                    <motion.span
                       ref={heroLogoRef}
                       style={{
-                        display: "inline-block",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        minWidth: "0.74em",
+                        minHeight: "0.74em",
                         lineHeight: 0,
                         verticalAlign: "0em",
                         marginLeft: "0.05em",
                         marginRight: "0.05em",
                       }}
+                      initial={false}
+                      animate={{
+                        scale: [0.95, 1.06, 1],
+                        filter: [
+                          "drop-shadow(0 0 0px rgba(0,210,255,0))",
+                          "drop-shadow(0 0 20px rgba(0,210,255,0.55))",
+                          "drop-shadow(0 0 0px rgba(0,210,255,0))",
+                        ],
+                      }}
+                      transition={{ duration: 0.34, delay: 0.02, ease: "easeOut" }}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src="/logo-l.png"
-                        alt="l"
+                        alt="L"
                         style={{
                           height: "0.72em",
                           width: "auto",
                           display: "block",
+                          opacity: 1,
                           filter: "invert(1) hue-rotate(180deg)",
                         }}
                       />
-                    </span>
-                  </motion.span>
-                );
-              }
-              // Letters of "build" dissolve with the logo
-              if (DISSOLVE_INDICES.has(i)) {
-                return (
-                  <motion.span
-                    key={`top-${i}`}
-                    custom={i}
-                    variants={letterAnimation}
-                    initial="hidden"
-                    animate="visible"
-                    className="inline-block text-white"
-                    style={{
-                      transformOrigin: "bottom",
-                      opacity: buildLetterOp,
-                      y: buildLetterY,
-                    }}
-                  >
-                    {char}
+                    </motion.span>
                   </motion.span>
                 );
               }
@@ -199,12 +228,13 @@ export default function Hero() {
               );
             })}
           </span>
+
           <span className="mt-2 block overflow-hidden" style={{ perspective: "1000px" }}>
             {headlineBottom.split("").map((char, i) => (
               <motion.span
                 key={`bottom-${i}`}
-                custom={i + headlineTop.length}
-                variants={letterAnimation}
+                custom={i}
+                variants={futureAnimation}
                 initial="hidden"
                 animate="visible"
                 className="inline-block"
@@ -222,27 +252,27 @@ export default function Hero() {
           </span>
         </h1>
 
-        {/* Subtext */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.8 }}
+          transition={{ duration: 0.42, delay: 0.28 }}
           className="mt-8 max-w-lg text-base leading-relaxed sm:text-lg"
           style={{ color: "rgba(255,255,255,0.4)" }}
         >
-          Technology studio crafting next-gen web experiences,
-          AI integrations & scalable cloud architecture.
+          Technology studio crafting next-gen web experiences, AI integrations & scalable cloud
+          architecture.
         </motion.p>
 
-        {/* CTAs */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 2.2 }}
-          className="mt-10 flex flex-col items-center gap-4 sm:flex-row"
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-24 flex flex-col items-center gap-4 sm:flex-row"
+          style={{ marginTop: "30px" }}
         >
           <a
             href="/work"
+            className="hover:opacity-95"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -253,16 +283,17 @@ export default function Hero() {
               color: "white",
               textDecoration: "none",
               background: "linear-gradient(135deg, #00D2FF, #3a7bd5)",
-              transition: "box-shadow 0.3s",
+              transition: "opacity 0.25s ease, filter 0.25s ease",
               flexShrink: 0,
+              filter: "saturate(1)",
             }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 0 40px rgba(0,210,255,0.4)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none"; }}
           >
             Let&apos;s talk
           </a>
+
           <a
             href="/work"
+            className="hover:text-white"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -274,18 +305,21 @@ export default function Hero() {
               color: "rgba(255,255,255,0.65)",
               textDecoration: "none",
               border: "1px solid rgba(255,255,255,0.12)",
-              transition: "border-color 0.25s, color 0.25s",
+              transition: "border-color 0.25s ease, color 0.25s ease, background 0.25s ease",
               flexShrink: 0,
+              background: "rgba(255,255,255,0.01)",
             }}
             onMouseEnter={(e) => {
               const el = e.currentTarget as HTMLAnchorElement;
-              el.style.borderColor = "rgba(255,255,255,0.25)";
+              el.style.borderColor = "rgba(255,255,255,0.2)";
               el.style.color = "white";
+              el.style.background = "rgba(255,255,255,0.03)";
             }}
             onMouseLeave={(e) => {
               const el = e.currentTarget as HTMLAnchorElement;
               el.style.borderColor = "rgba(255,255,255,0.12)";
               el.style.color = "rgba(255,255,255,0.65)";
+              el.style.background = "rgba(255,255,255,0.01)";
             }}
           >
             View our work
@@ -294,13 +328,12 @@ export default function Hero() {
             </svg>
           </a>
         </motion.div>
-      </div>
+      </motion.div>
 
-      {/* Scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 3, duration: 1 }}
+        transition={{ delay: 0.4, duration: 0.8 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
       >
         <div className="flex flex-col items-center gap-2">
@@ -308,7 +341,7 @@ export default function Hero() {
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-            className="h-8 w-[1px] bg-gradient-to-b from-white/20 to-transparent"
+            className="h-8 w-px bg-linear-to-b from-white/20 to-transparent"
           />
         </div>
       </motion.div>

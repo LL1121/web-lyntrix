@@ -7,10 +7,9 @@ import { Menu, X } from "lucide-react";
 import { navLogoRef } from "@/lib/logo-refs";
 
 const navLinks = [
-  { label: "Vision",   href: "#vision"   },
-  { label: "Services", href: "#services" },
-  { label: "Work",     href: "#work"     },
-  { label: "Contact",  href: "#contact"  },
+  { label: "Home",    href: "/"        },
+  { label: "Work",    href: "/work"    },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Navbar() {
@@ -20,17 +19,18 @@ export default function Navbar() {
   const { scrollY } = useScroll();
 
   // ── Scroll thresholds (home only — on inner pages navbar is always visible) ──
-  const APPEAR_START = 80;
-  const APPEAR_END   = 200;
+  const APPEAR_START = 40;
+  const APPEAR_END   = 220;
 
   const containerOpacity = useTransform(scrollY, [APPEAR_START, APPEAR_END], [0, 1]);
   const containerBlur    = useTransform(scrollY, [APPEAR_START, APPEAR_END], [8, 0]);
   const containerY       = useTransform(scrollY, [APPEAR_START, APPEAR_END], [-16, 0]);
-  const springY          = useSpring(containerY, { stiffness: 160, damping: 26 });
+  const springY          = useSpring(containerY, { stiffness: 120, damping: 24 });
+  const springOpacity    = useSpring(containerOpacity, { stiffness: 110, damping: 26 });
   const blurFilter       = useTransform(containerBlur, (v) => `blur(${v}px)`);
 
   // For inner pages: override with static values
-  const navOpacity = isHome ? containerOpacity : 1;
+  const navOpacity = isHome ? springOpacity : 1;
   const navY       = isHome ? springY          : 0;
   const navFilter  = isHome ? blurFilter       : "blur(0px)";
 
@@ -38,14 +38,8 @@ export default function Navbar() {
   const glassBg = useTransform(
     scrollY,
     [APPEAR_END, APPEAR_END + 200],
-    ["rgba(0,0,0,0.45)", "rgba(0,0,0,0.82)"]
+    ["rgba(8,12,18,0.22)", "rgba(8,12,18,0.34)"]
   );
-  const glassBorder = useTransform(
-    scrollY,
-    [APPEAR_END, APPEAR_END + 150],
-    ["rgba(255,255,255,0.06)", "rgba(255,255,255,0.1)"]
-  );
-
   const LINKS_START = APPEAR_START + 20;
   const CTA_START   = APPEAR_START + 40;
 
@@ -73,8 +67,9 @@ export default function Navbar() {
         style={{
           position: "fixed",
           top: "20px",
-          left: "50%",
-          x: "-50%",
+          left: 0,
+          right: 0,
+          margin: "0 auto",
           zIndex: 50,
           width: "calc(100% - 48px)",
           maxWidth: "1100px",
@@ -83,28 +78,40 @@ export default function Navbar() {
           filter: navFilter,
         }}
       >
+        <motion.div
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "16px",
+            backdropFilter: "blur(22px) saturate(175%) brightness(1.1) contrast(1.12)",
+            WebkitBackdropFilter: "blur(22px) saturate(175%) brightness(1.1) contrast(1.12)",
+            background: glassBg,
+            boxShadow:
+              "0 8px 24px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(255,255,255,0.08)",
+            border: "none",
+          }}
+        />
+
         <motion.nav
           style={{
-            display: "flex",
+            position: "relative",
+            zIndex: 2,
+            display: "grid",
+            gridTemplateColumns: "1fr auto 1fr",
             alignItems: "center",
-            justifyContent: "space-between",
             padding: "10px 16px 10px 20px",
             borderRadius: "16px",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            background: glassBg,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)",
-            border: `1px solid`,
-            borderColor: glassBorder,
+            background: "transparent",
           }}
         >
           {/* Logo — crystallizes from particles at scrollY ~270–340 */}
           <motion.a
-            href="#"
+            href="/"
             ref={navLogoRef}
             style={{
               display: "flex",
               alignItems: "center",
+              justifySelf: "start",
               textDecoration: "none",
               opacity: logoOp,
               scale: logoScale,
@@ -130,16 +137,14 @@ export default function Navbar() {
               display: "flex",
               alignItems: "center",
               gap: "4px",
-              position: "absolute",
-              left: "50%",
-              transform: "translateX(-50%)",
+              justifySelf: "center",
               opacity: linksOp,
               y: linksY,
             }}
           >
             {navLinks.map((link) => (
               <a
-                key={link.href}
+                key={link.label}
                 href={link.href}
                 style={{
                   padding: "7px 14px",
@@ -168,10 +173,11 @@ export default function Navbar() {
 
           {/* CTA */}
           <motion.a
-            href="#contact"
+            href="/contact"
             style={{
               display: "inline-flex",
               alignItems: "center",
+              justifySelf: "end",
               padding: "9px 20px",
               borderRadius: "10px",
               fontSize: "13.5px",
@@ -217,12 +223,12 @@ export default function Navbar() {
             justifyContent: "space-between",
             padding: "14px 20px",
             borderBottom: "1px solid rgba(255,255,255,0.06)",
-            background: "rgba(0,0,0,0.88)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
+            background: "rgba(0,0,0,0.22)",
+            backdropFilter: "blur(20px) saturate(165%)",
+            WebkitBackdropFilter: "blur(20px) saturate(165%)",
           }}
         >
-          <a href="#" style={{ textDecoration: "none" }}>
+          <a href="/" style={{ textDecoration: "none" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo.png"
@@ -266,7 +272,7 @@ export default function Navbar() {
               <div style={{ display: "flex", flexDirection: "column", gap: "4px", padding: "12px 16px 20px" }}>
                 {navLinks.map((link) => (
                   <a
-                    key={link.href}
+                    key={link.label}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
                     style={{
@@ -282,7 +288,7 @@ export default function Navbar() {
                   </a>
                 ))}
                 <a
-                  href="#contact"
+                  href="/contact"
                   onClick={() => setMobileOpen(false)}
                   style={{
                     marginTop: "8px",

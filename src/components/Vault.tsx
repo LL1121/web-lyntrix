@@ -51,131 +51,170 @@ const SIDE_PADDING = 64;
 export default function Vault() {
   const { lenis } = useLenisInstance();
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isActiveRef = useRef(false);
-  const offsetRef = useRef(0);
-  const [offsetState, setOffsetState] = useState(0);
+
+  // ── All scroll-logic state in refs (no stale closures) ─────────────────
+  const isLockedRef      = useRef(false);   // currently locked to horizontal
+  const isExperiencedRef = useRef(false);   // user scrolled through all cards already
+  const brakeTargetRef   = useRef<number | null>(null); // target Y for smooth braking
+  const offsetRef        = useRef(0);
+  const maxOffsetRef     = useRef(0);
+
+  // UI state (for rendering only)
   const [isActive, setIsActive] = useState(false);
   const [progress, setProgress] = useState(0);
-  const maxOffsetRef = useRef(0);
+  const [selectedProject, setSelectedProject] = useState<(typeof projects)[number] | null>(null);
 
-  // Smooth spring animation for translateX
-  const x = useMotionValue(0);
-  const xSpring = useSpring(x, { stiffness: 180, damping: 28, mass: 0.8 });
+  const x       = useMotionValue(0);
+  const xSpring = useSpring(x, { stiffness: 140, damping: 30, mass: 1.1 });
 
-  // Calculate max offset
+  // ── Max offset calculation ──────────────────────────────────────────────
   useEffect(() => {
-    const updateMax = () => {
-      const totalWidth =
-        projects.length * CARD_WIDTH +
-        (projects.length - 1) * CARD_GAP +
-        SIDE_PADDING * 2;
-      maxOffsetRef.current = Math.max(0, totalWidth - window.innerWidth);
+    const calc = () => {
+      const total = projects.length * CARD_WIDTH + (projects.length - 1) * CARD_GAP + SIDE_PADDING * 2;
+      maxOffsetRef.current = Math.max(0, total - window.innerWidth);
     };
-    updateMax();
-    window.addEventListener("resize", updateMax);
-    return () => window.removeEventListener("resize", updateMax);
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
   }, []);
 
-  // Activation via IntersectionObserver
+  // ── Reset carousel when section leaves viewport completely ─────────────
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const active = entry.isIntersecting && entry.intersectionRatio >= 0.7;
-        isActiveRef.current = active;
-        setIsActive(active);
-
-        if (active) {
-          lenis?.stop();
-        } else {
-          // Only restart if we didn't reach the end or start
+    const obs = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) {
+        // Reset everything when section leaves viewport
+        offsetRef.current = 0;
+        x.set(0);
+        setProgress(0);
+        isExperiencedRef.current = false;
+        brakeTargetRef.current = null;
+        if (isLockedRef.current) {
           lenis?.start();
+          isLockedRef.current = false;
+          setIsActive(false);
         }
-      },
-      { threshold: [0, 0.7, 1] }
-    );
-
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, [lenis]);
-
-  // Wheel interception
-  const handleWheel = useCallback(
-    (e: WheelEvent) => {
-      if (!isActiveRef.current) return;
-
-      const max = maxOffsetRef.current;
-      const current = offsetRef.current;
-      const delta = e.deltaY;
-
-      const atStart = current >= 0 && delta < 0;
-      const atEnd = current <= -max && delta > 0;
-
-      if (atStart) {
-        // Release to scroll up
-        isActiveRef.current = false;
-        setIsActive(false);
-        lenis?.start();
-        return;
       }
+    }, { threshold: 0 });
+    obs.observe(section);
+    return () => obs.disconnect();
+  }, [lenis, x]);
 
-      if (atEnd) {
-        // Release to scroll down
-        isActiveRef.current = false;
-        setIsActive(false);
-        lenis?.start();
-        return;
-      }
-
-      e.preventDefault();
-      e.stopPropagation();
-
-      const next = Math.max(-max, Math.min(0, current - delta * 0.8));
-      offsetRef.current = next;
-      setOffsetState(next);
-      x.set(next);
-      setProgress(Math.abs(next) / max);
-    },
-    [lenis, x]
-  );
-
+  // ── Master wheel handler ────────────────────────────────────────────────
   useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      const section = sectionRef.current;
+      if (!section) return;
+
+      const scrollingDown = e.deltaY > 0;
+
+      // ── If already experienced, upscroll passes freely ──────────────────
+      // (Only allow re-locking if scrolled away entirely — handled by IntersectionObserver)
+      if (isExperiencedRef.current) return;
+
+      const rect = section.getBoundingClientRect();
+      const vh   = window.innerHeight;
+
+      // Is section completely outside viewport?
+      if (rect.bottom < 0 || rect.top > vh) return;
+
+      const sectionCenterViewport = rect.top + rect.height / 2;
+      const viewportCenter        = vh / 2;
+
+      // ── LOCKED: horizontal scroll active ────────────────────────────────
+      if (isLockedRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const max     = maxOffsetRef.current;
+        const current = offsetRef.current;
+
+        // At start + scrolling up → release WITHOUT marking experienced
+        if (!scrollingDown && current >= 0) {
+          lenis?.start();
+          isLockedRef.current = false;
+          setIsActive(false);
+          brakeTargetRef.current = null;
+          return;
+        }
+
+        // At end + scrolling down → mark experienced, release
+        if (scrollingDown && current <= -max) {
+          lenis?.start();
+          isLockedRef.current = false;
+          isExperiencedRef.current = true;
+          setIsActive(false);
+          return;
+        }
+
+        // Horizontal scroll — 0.35x for deliberate, cinematic feel
+        const next = Math.max(-max, Math.min(0, current - e.deltaY * 0.35));
+        offsetRef.current = next;
+        x.set(next);
+        setProgress(Math.abs(next) / max);
+        return;
+      }
+
+      // ── Only engage on downward scroll ──────────────────────────────────
+      if (!scrollingDown) return;
+
+      // ── LOCK ZONE: section center at viewport center (±55px) ────────────
+      const atCenter = Math.abs(sectionCenterViewport - viewportCenter) <= 55;
+      if (atCenter) {
+        e.preventDefault();
+        lenis?.stop();
+        isLockedRef.current = true;
+        brakeTargetRef.current = null;
+        setIsActive(true);
+        return;
+      }
+
+      // ── APPROACH ZONE: section entering from below, not yet centered ─────
+      // Section is partially visible from below (top > 0, approaching center)
+      const isApproaching = rect.top < vh && sectionCenterViewport > viewportCenter + 55;
+      if (isApproaching) {
+        // Braking multiplier: 1.0 (just entering) → 0.08 (just before lock)
+        // Distance from lock: sectionCenter - viewportCenter - 55
+        const distToLock  = sectionCenterViewport - viewportCenter - 55;
+        // Scale distance: 0 = at lock edge, ~300 = far away
+        const normalised  = Math.min(1, distToLock / 280);
+        // Ease so it feels like a smooth deceleration
+        const brake       = 0.08 + normalised * 0.92;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Drive Lenis to scroll a reduced amount
+        const reducedDelta = e.deltaY * brake;
+        const currentY     = window.scrollY;
+        lenis?.scrollTo(currentY + reducedDelta, { immediate: true });
+      }
+    };
+
     window.addEventListener("wheel", handleWheel, { passive: false });
     return () => window.removeEventListener("wheel", handleWheel);
-  }, [handleWheel]);
+  }, [lenis, x]);
 
   // Touch support
   const touchStartY = useRef(0);
-  const touchStartX = useRef(0);
-
   useEffect(() => {
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartY.current = e.touches[0].clientY;
-      touchStartX.current = e.touches[0].clientX;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!isActiveRef.current) return;
-      const dy = touchStartY.current - e.touches[0].clientY;
-      const dx = touchStartX.current - e.touches[0].clientX;
-      const primary = Math.abs(dy) > Math.abs(dx) ? dy : dx;
+    const onStart = (e: TouchEvent) => { touchStartY.current = e.touches[0].clientY; };
+    const onMove  = (e: TouchEvent) => {
+      if (!isLockedRef.current) return;
+      const dy  = touchStartY.current - e.touches[0].clientY;
       const max = maxOffsetRef.current;
-      const next = Math.max(-max, Math.min(0, offsetRef.current - primary));
+      const next = Math.max(-max, Math.min(0, offsetRef.current - dy * 0.5));
       offsetRef.current = next;
-      setOffsetState(next);
       x.set(next);
       setProgress(Math.abs(next) / max);
       touchStartY.current = e.touches[0].clientY;
-      touchStartX.current = e.touches[0].clientX;
     };
-
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("touchstart", onStart, { passive: true });
+    window.addEventListener("touchmove", onMove, { passive: true });
     return () => {
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchstart", onStart);
+      window.removeEventListener("touchmove", onMove);
     };
   }, [x]);
 
@@ -318,7 +357,8 @@ export default function Vault() {
                 cursor: "pointer",
                 transition: "border-color 0.3s",
               }}
-              whileHover={{ borderColor: "rgba(255,255,255,0.15)" } as never}
+              whileHover={{ borderColor: "rgba(0,210,255,0.34)", y: -8, scale: 1.015 } as never}
+              onClick={() => setSelectedProject(project)}
             >
               {/* Image area */}
               <div
@@ -339,7 +379,7 @@ export default function Vault() {
                   }}
                 />
                 {/* Glow */}
-                <div
+                <motion.div
                   style={{
                     position: "absolute",
                     top: "40%",
@@ -351,6 +391,7 @@ export default function Vault() {
                     background: `${project.accent}35`,
                     filter: "blur(32px)",
                   }}
+                  whileHover={{ scale: 1.5, opacity: 0.95 }}
                 />
                 {/* Bottom fade */}
                 <div
@@ -461,6 +502,152 @@ export default function Vault() {
             <span style={{ fontSize: "11px", color: "rgba(0,210,255,0.8)", fontWeight: 500, letterSpacing: "0.05em" }}>
               ← Scroll to navigate projects →
             </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Project modal */}
+      <AnimatePresence>
+        {selectedProject && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedProject(null)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 250,
+              background: "rgba(0,0,0,0.72)",
+              backdropFilter: "blur(10px)",
+              display: "grid",
+              placeItems: "center",
+              padding: "24px",
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.96 }}
+              transition={{ duration: 0.35 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: "min(880px, 100%)",
+                borderRadius: "18px",
+                overflow: "hidden",
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(8,8,10,0.95)",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+              }}
+            >
+              <div
+                style={{
+                  position: "relative",
+                  aspectRatio: "16/8",
+                  background: selectedProject.gradient,
+                  borderBottom: "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    backgroundImage:
+                      "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
+                    backgroundSize: "40px 40px",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "45%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    width: "180px",
+                    height: "180px",
+                    borderRadius: "50%",
+                    background: `${selectedProject.accent}45`,
+                    filter: "blur(36px)",
+                  }}
+                />
+                <button
+                  onClick={() => setSelectedProject(null)}
+                  style={{
+                    position: "absolute",
+                    top: "14px",
+                    right: "14px",
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "999px",
+                    border: "1px solid rgba(255,255,255,0.18)",
+                    color: "white",
+                    background: "rgba(0,0,0,0.35)",
+                    cursor: "pointer",
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+              <div style={{ padding: "26px 28px 30px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+                  <span
+                    style={{
+                      padding: "4px 10px",
+                      borderRadius: "999px",
+                      fontSize: "11px",
+                      border: `1px solid ${selectedProject.accent}44`,
+                      color: `${selectedProject.accent}cc`,
+                      background: `${selectedProject.accent}14`,
+                    }}
+                  >
+                    {selectedProject.category}
+                  </span>
+                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.3)" }}>{selectedProject.year}</span>
+                </div>
+                <h3 style={{ fontSize: "30px", color: "white", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "10px" }}>
+                  {selectedProject.title}
+                </h3>
+                <p style={{ fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.46)", marginBottom: "24px" }}>
+                  {selectedProject.description}
+                </p>
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                  <a
+                    href="/contact"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "12px 18px",
+                      borderRadius: "999px",
+                      background: "linear-gradient(135deg, #00D2FF, #3a7bd5)",
+                      color: "white",
+                      textDecoration: "none",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Start similar project
+                  </a>
+                  <a
+                    href="/contact"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "12px 18px",
+                      borderRadius: "999px",
+                      border: "1px solid rgba(255,255,255,0.16)",
+                      color: "rgba(255,255,255,0.86)",
+                      textDecoration: "none",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Request case study
+                  </a>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

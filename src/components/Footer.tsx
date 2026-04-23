@@ -29,11 +29,35 @@ const socials: { label: string; icon: () => React.JSX.Element; href: string }[] 
 export default function Footer() {
   return (
     <footer
-      className="relative py-12"
-      style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      className="relative py-14"
+      style={{
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+        background:
+          "linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.005) 18%, transparent 100%)",
+      }}
     >
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "min(980px, 86vw)",
+          height: "1px",
+          background:
+            "linear-gradient(90deg, transparent, rgba(0,210,255,0.34), rgba(58,123,213,0.34), transparent)",
+          pointerEvents: "none",
+        }}
+      />
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+        <div
+          className="flex flex-col items-center justify-between gap-6 rounded-2xl px-5 py-5 sm:flex-row sm:px-6"
+          style={{
+            border: "1px solid rgba(255,255,255,0.06)",
+            background: "rgba(255,255,255,0.015)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
           <div className="flex items-center gap-8">
             <span className="text-lg font-bold tracking-tight text-white">
               Lyn
@@ -58,7 +82,7 @@ export default function Footer() {
               <motion.a
                 key={label}
                 href={href}
-                whileHover={{ y: -2 }}
+                whileHover={{ scale: 1.04 }}
                 aria-label={label}
                 className="flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-300"
                 style={{
@@ -68,11 +92,13 @@ export default function Footer() {
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.7)";
-                  (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.15)";
+                  (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(0,210,255,0.34)";
+                  (e.currentTarget as HTMLAnchorElement).style.background = "rgba(0,210,255,0.08)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.35)";
                   (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.07)";
+                  (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.02)";
                 }}
               >
                 <Icon />

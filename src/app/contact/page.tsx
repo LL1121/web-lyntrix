@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Start a Project — Lyntrix",
-  description: "Ready to build something extraordinary? Drop us a signal. Limited availability — 2 project slots for Q3 2025.",
+  description: "Ready to build something extraordinary? Drop us a signal and we will respond within 48 hours.",
 };
 
 export default function ContactPage() {
@@ -46,7 +46,7 @@ export default function ContactPage() {
           </span>
         </h1>
         <p style={{ fontSize: "1rem", color: "rgba(255,255,255,0.38)", maxWidth: "460px", margin: "0 auto", lineHeight: 1.7 }}>
-          2 project slots remaining for Q3 2025. Tell us what you&apos;re building and we&apos;ll respond within 48 hours.
+          Tell us what you&apos;re building and we&apos;ll respond within 48 hours.
         </p>
       </div>
 
