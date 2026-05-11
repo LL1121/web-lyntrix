@@ -6,7 +6,10 @@ WORKDIR /app
 
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN npm ci
+# Alpine's default npm 10 can fail `npm ci` on this lock (picomatch hoisted vs nested).
+# Use npm 11+ and `npm install` so the tree resolves like on dev machines.
+RUN npm install -g npm@11.14.1 \
+  && npm install --no-audit --no-fund
 
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
