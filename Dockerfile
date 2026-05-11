@@ -6,10 +6,10 @@ WORKDIR /app
 
 FROM base AS deps
 COPY package.json package-lock.json ./
-# Alpine's default npm 10 can fail `npm ci` on this lock (picomatch hoisted vs nested).
-# Use npm 11+ and `npm install` so the tree resolves like on dev machines.
-RUN npm install -g npm@11.14.1 \
-  && npm install --no-audit --no-fund
+# `npm ci` on Alpine's npm 10 rejects this lockfile (picomatch hoisted vs nested).
+# Global `npm i -g npm@11` on musl often breaks (missing promise-retry, etc.).
+# `npm install` respects the lockfile enough for a reproducible Docker build.
+RUN npm install --no-audit --no-fund
 
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
