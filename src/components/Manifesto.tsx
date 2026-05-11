@@ -2,20 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
-
-const lines = [
-  { text: "We don't just write code.", bold: true },
-  { text: "We architect digital ecosystems that redefine what's possible.", bold: false },
-  {
-    text: "Lyntrix exists at the intersection of design precision, engineering excellence, and artificial intelligence.",
-    bold: false,
-  },
-  {
-    text: "Every pixel is intentional. Every interaction is crafted. Every solution is built to scale.",
-    bold: false,
-  },
-  { text: "We partner with visionaries who refuse to settle for ordinary.", bold: true },
-];
+import { useDictionary } from "@/lib/use-locale";
 
 function AnimatedLine({
   text,
@@ -58,6 +45,8 @@ export default function Manifesto() {
     target: sectionRef,
     offset: ["start 0.85", "end 0.15"],
   });
+  const dict = useDictionary();
+  const lines = dict.manifesto.lines;
 
   return (
     <section id="vision" ref={sectionRef} style={{ position: "relative", padding: "96px 0" }}>
@@ -103,7 +92,7 @@ export default function Manifesto() {
                 marginBottom: "20px",
               }}
             >
-              The Vision
+              {dict.manifesto.kicker}
             </span>
             <h2
               style={{
@@ -115,9 +104,9 @@ export default function Manifesto() {
                 marginBottom: "24px",
               }}
             >
-              Our
+              {dict.manifesto.titleTop}
               <br />
-              philosophy.
+              {dict.manifesto.titleBottom}
             </h2>
             <div
               style={{
@@ -136,9 +125,7 @@ export default function Manifesto() {
                 maxWidth: "280px",
               }}
             >
-              Not just a vendor. A long-term
-              technical partner invested in
-              your growth.
+              {dict.manifesto.sideCopy}
             </p>
           </div>
 

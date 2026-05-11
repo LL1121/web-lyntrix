@@ -1,22 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { navLogoRef } from "@/lib/logo-refs";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
+import { getDictionary } from "@/lib/dictionaries";
 
 const navLinks = [
-  { label: "Home",    href: "/"        },
-  { label: "Work",    href: "/work"    },
+  { label: "Home", href: "" },
+  { label: "Work", href: "/work" },
   { label: "Contact", href: "/contact" },
 ];
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const router = useRouter();
   const pathname = usePathname();
-  const isHome   = pathname === "/";
+  const segments = pathname.split("/").filter(Boolean);
+  const locale = segments[0] && isLocale(segments[0]) ? segments[0] : DEFAULT_LOCALE;
+  const pathWithoutLocale = segments[0] && isLocale(segments[0]) ? `/${segments.slice(1).join("/")}` : pathname;
+  const normalizedPath = pathWithoutLocale === "/" ? "" : pathWithoutLocale;
+  const withLocale = (href: string) => `/${locale}${href}`;
+  const dict = getDictionary(locale);
+  const isHome = normalizedPath === "";
   const { scrollY } = useScroll();
+
+  const switchLocale = (nextLocale: "en" | "es") => {
+    if (nextLocale === locale) return;
+    const nextPath = `/${nextLocale}${normalizedPath}`;
+    document.cookie = `lang=${nextLocale}; path=/; max-age=31536000; samesite=lax`;
+    router.push(nextPath);
+  };
 
   // ── Scroll thresholds (home only — on inner pages navbar is always visible) ──
   const APPEAR_START = 40;
@@ -106,7 +122,7 @@ export default function Navbar() {
         >
           {/* Logo — crystallizes from particles at scrollY ~270–340 */}
           <motion.a
-            href="/"
+            href={withLocale("")}
             ref={navLogoRef}
             style={{
               display: "flex",
@@ -145,7 +161,7 @@ export default function Navbar() {
             {navLinks.map((link) => (
               <a
                 key={link.label}
-                href={link.href}
+                href={withLocale(link.href)}
                 style={{
                   padding: "7px 14px",
                   borderRadius: "8px",
@@ -166,14 +182,89 @@ export default function Navbar() {
                   el.style.background = "transparent";
                 }}
               >
-                {link.label}
+                {link.label === "Home"
+                  ? dict.navbar.links.home
+                  : link.label === "Work"
+                    ? dict.navbar.links.work
+                    : dict.navbar.links.contact}
               </a>
             ))}
           </motion.div>
 
           {/* CTA */}
-          <motion.a
-            href="/contact"
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", justifySelf: "end" }}>
+            <div
+              style={{
+                position: "relative",
+                display: "inline-grid",
+                gridTemplateColumns: "1fr 1fr",
+                alignItems: "center",
+                borderRadius: "999px",
+                border: "1px solid rgba(255,255,255,0.14)",
+                background: "rgba(255,255,255,0.03)",
+                padding: "2px",
+                minWidth: "74px",
+              }}
+            >
+              <motion.div
+                layout
+                transition={{ type: "spring", stiffness: 340, damping: 28 }}
+                style={{
+                  position: "absolute",
+                  top: "2px",
+                  left: locale === "en" ? "2px" : "calc(50% + 1px)",
+                  width: "calc(50% - 3px)",
+                  bottom: "2px",
+                  borderRadius: "999px",
+                  background: "linear-gradient(135deg, rgba(0,210,255,0.28), rgba(58,123,213,0.2))",
+                  border: "1px solid rgba(0,210,255,0.32)",
+                  pointerEvents: "none",
+                }}
+              />
+              <button
+                onClick={() => switchLocale("en")}
+                style={{
+                  position: "relative",
+                  zIndex: 2,
+                  display: "grid",
+                  placeItems: "center",
+                  height: "26px",
+                  minWidth: "34px",
+                  border: "none",
+                  background: "transparent",
+                  color: locale === "en" ? "white" : "rgba(255,255,255,0.55)",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.06em",
+                  cursor: "pointer",
+                }}
+              >
+                EN
+              </button>
+              <button
+                onClick={() => switchLocale("es")}
+                style={{
+                  position: "relative",
+                  zIndex: 2,
+                  display: "grid",
+                  placeItems: "center",
+                  height: "26px",
+                  minWidth: "34px",
+                  border: "none",
+                  background: "transparent",
+                  color: locale === "es" ? "white" : "rgba(255,255,255,0.55)",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.06em",
+                  cursor: "pointer",
+                }}
+              >
+                ES
+              </button>
+            </div>
+
+            <motion.a
+              href={withLocale("/contact")}
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -199,9 +290,10 @@ export default function Navbar() {
               (e.currentTarget as HTMLAnchorElement).style.opacity = "1";
               (e.currentTarget as HTMLAnchorElement).style.filter = "saturate(1)";
             }}
-          >
-            Start a project
-          </motion.a>
+            >
+              {dict.navbar.cta}
+            </motion.a>
+          </div>
         </motion.nav>
       </motion.div>
 
@@ -230,7 +322,7 @@ export default function Navbar() {
             WebkitBackdropFilter: "blur(20px) saturate(165%)",
           }}
         >
-          <a href="/" style={{ textDecoration: "none" }}>
+          <a href={withLocale("")} style={{ textDecoration: "none" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo.png"
@@ -275,7 +367,7 @@ export default function Navbar() {
                 {navLinks.map((link) => (
                   <a
                     key={link.label}
-                    href={link.href}
+                    href={withLocale(link.href)}
                     onClick={() => setMobileOpen(false)}
                     style={{
                       padding: "12px 14px",
@@ -286,11 +378,55 @@ export default function Navbar() {
                       textDecoration: "none",
                     }}
                   >
-                    {link.label}
+                    {link.label === "Home"
+                      ? dict.navbar.links.home
+                      : link.label === "Work"
+                        ? dict.navbar.links.work
+                        : dict.navbar.links.contact}
                   </a>
                 ))}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
+                  <button
+                    onClick={() => {
+                      switchLocale("es");
+                      setMobileOpen(false);
+                    }}
+                    style={{
+                      padding: "10px 12px",
+                      borderRadius: "9px",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      background: locale === "es" ? "rgba(0,210,255,0.14)" : "rgba(255,255,255,0.03)",
+                      color: locale === "es" ? "white" : "rgba(255,255,255,0.65)",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      letterSpacing: "0.06em",
+                      cursor: "pointer",
+                    }}
+                  >
+                    ES
+                  </button>
+                  <button
+                    onClick={() => {
+                      switchLocale("en");
+                      setMobileOpen(false);
+                    }}
+                    style={{
+                      padding: "10px 12px",
+                      borderRadius: "9px",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      background: locale === "en" ? "rgba(0,210,255,0.14)" : "rgba(255,255,255,0.03)",
+                      color: locale === "en" ? "white" : "rgba(255,255,255,0.65)",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      letterSpacing: "0.06em",
+                      cursor: "pointer",
+                    }}
+                  >
+                    EN
+                  </button>
+                </div>
                 <a
-                  href="/contact"
+                  href={withLocale("/contact")}
                   onClick={() => setMobileOpen(false)}
                   style={{
                     marginTop: "8px",
@@ -305,7 +441,7 @@ export default function Navbar() {
                     width: "fit-content",
                   }}
                 >
-                  Start a project
+                  {dict.navbar.cta}
                 </a>
               </div>
             </motion.div>

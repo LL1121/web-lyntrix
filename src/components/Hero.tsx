@@ -2,8 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { usePathname, useRouter } from "next/navigation";
 import { heroLogoRef } from "@/lib/logo-refs";
 import MagneticButton from "@/components/MagneticButton";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
+import { useDictionary } from "@/lib/use-locale";
 
 const letterAnimation = {
   hidden: { opacity: 0, y: 34, rotateX: -50 },
@@ -34,15 +37,27 @@ const futureAnimation = {
   }),
 };
 
-const LOGO_LETTER_INDEX = 6; // "L" in "We build the"
-
 export default function Hero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+  const segments = pathname.split("/").filter(Boolean);
+  const locale = segments[0] && isLocale(segments[0]) ? segments[0] : DEFAULT_LOCALE;
+  const pathWithoutLocale = segments[0] && isLocale(segments[0]) ? `/${segments.slice(1).join("/")}` : pathname;
+  const normalizedPath = pathWithoutLocale === "/" ? "" : pathWithoutLocale;
 
   const { scrollY } = useScroll();
   const heroLogoOpacity = useTransform(scrollY, [20, 85], [1, 0]);
-  const headlineTop = "We build the";
-  const headlineBottom = "future.";
+  const dict = useDictionary();
+  const headlineTop = dict.hero.headlineTop;
+  const headlineBottom = dict.hero.headlineBottom;
+  const logoLetterIndex = dict.hero.logoLetterIndex;
+
+  const switchLocale = (nextLocale: "en" | "es") => {
+    if (nextLocale === locale) return;
+    document.cookie = `lang=${nextLocale}; path=/; max-age=31536000; samesite=lax`;
+    router.push(`/${nextLocale}${normalizedPath}`);
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -138,6 +153,84 @@ export default function Hero() {
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         style={{ pointerEvents: "auto" }}
       >
+        {/* Language capsule visible at first paint (before navbar appears) */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.06 }}
+          style={{ marginBottom: "16px" }}
+        >
+          <div
+            style={{
+              position: "relative",
+              display: "inline-grid",
+              gridTemplateColumns: "1fr 1fr",
+              alignItems: "center",
+              borderRadius: "999px",
+              border: "1px solid rgba(255,255,255,0.14)",
+              background: "rgba(255,255,255,0.03)",
+              padding: "2px",
+              minWidth: "82px",
+            }}
+          >
+            <motion.div
+              layout
+              transition={{ type: "spring", stiffness: 340, damping: 28 }}
+              style={{
+                position: "absolute",
+                top: "2px",
+                left: locale === "en" ? "2px" : "calc(50% + 1px)",
+                width: "calc(50% - 3px)",
+                bottom: "2px",
+                borderRadius: "999px",
+                background: "linear-gradient(135deg, rgba(0,210,255,0.28), rgba(58,123,213,0.2))",
+                border: "1px solid rgba(0,210,255,0.32)",
+                pointerEvents: "none",
+              }}
+            />
+            <button
+              onClick={() => switchLocale("en")}
+              style={{
+                position: "relative",
+                zIndex: 2,
+                display: "grid",
+                placeItems: "center",
+                height: "28px",
+                minWidth: "38px",
+                border: "none",
+                background: "transparent",
+                color: locale === "en" ? "white" : "rgba(255,255,255,0.55)",
+                fontSize: "11px",
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                cursor: "pointer",
+              }}
+            >
+              EN
+            </button>
+            <button
+              onClick={() => switchLocale("es")}
+              style={{
+                position: "relative",
+                zIndex: 2,
+                display: "grid",
+                placeItems: "center",
+                height: "28px",
+                minWidth: "38px",
+                border: "none",
+                background: "transparent",
+                color: locale === "es" ? "white" : "rgba(255,255,255,0.55)",
+                fontSize: "11px",
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                cursor: "pointer",
+              }}
+            >
+              ES
+            </button>
+          </div>
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -156,14 +249,14 @@ export default function Hero() {
               className="h-1.5 w-1.5 rounded-full animate-pulse"
               style={{ background: "#00D2FF" }}
             />
-            AI-Powered Solutions
+            {dict.hero.badge}
           </span>
         </motion.div>
 
         <h1 className="text-5xl font-bold leading-[1.05] tracking-tight sm:text-7xl md:text-8xl lg:text-9xl">
           <span className="block overflow-hidden" style={{ perspective: "1000px" }}>
             {headlineTop.split("").map((char, i) => {
-              if (i === LOGO_LETTER_INDEX) {
+              if (i === logoLetterIndex) {
                 return (
                   <motion.span
                     key={`top-${i}`}
@@ -260,8 +353,7 @@ export default function Hero() {
           className="mt-8 max-w-lg text-base leading-relaxed sm:text-lg"
           style={{ color: "rgba(255,255,255,0.4)" }}
         >
-          Technology studio crafting next-gen web experiences, AI integrations & scalable cloud
-          architecture.
+          {dict.hero.description}
         </motion.p>
 
         <motion.div
@@ -272,11 +364,11 @@ export default function Hero() {
           style={{ marginTop: "30px" }}
         >
           <MagneticButton href="/work">
-            Let&apos;s talk
+            {dict.hero.ctaPrimary}
           </MagneticButton>
 
           <MagneticButton href="/work" variant="secondary">
-            View our work
+            {dict.hero.ctaSecondary}
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
@@ -291,7 +383,7 @@ export default function Hero() {
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
       >
         <div className="flex flex-col items-center gap-2">
-          <span className="text-[10px] font-medium tracking-[0.3em] text-white/20 uppercase">Scroll</span>
+          <span className="text-[10px] font-medium tracking-[0.3em] text-white/20 uppercase">{dict.hero.scroll}</span>
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}

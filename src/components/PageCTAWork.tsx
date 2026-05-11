@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, useInView, animate } from "framer-motion";
 import MagneticButton from "@/components/MagneticButton";
+import { useLocale } from "@/lib/use-locale";
 
 const stats = [
   { value: 50,  suffix: "+",  label: "Projects Shipped" },
@@ -43,12 +44,18 @@ const projects = [
 ];
 
 export default function PageCTAWork() {
+  const locale = useLocale();
+  const statLabels =
+    locale === "es"
+      ? ["Proyectos entregados", "Mejora prom. de conversión", "Despliegue más rápido", "Satisfacción de clientes"]
+      : ["Projects Shipped", "Avg Conversion Lift", "Faster Deployment", "Client Satisfaction"];
+  const localizedStats = stats.map((s, i) => ({ ...s, label: statLabels[i] ?? s.label }));
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   });
-  const bgX = useTransform(scrollYProgress, [0, 1], ["0%", "-5%"]);
+  useTransform(scrollYProgress, [0, 1], ["0%", "-5%"]);
 
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
 
@@ -89,7 +96,7 @@ export default function PageCTAWork() {
             margin: "0 auto 80px",
           }}
         >
-          {stats.map((s, i) => (
+          {localizedStats.map((s, i) => (
             <motion.div
               key={s.label}
               initial={{ opacity: 0, y: 16 }}
@@ -135,7 +142,7 @@ export default function PageCTAWork() {
           style={{ textAlign: "center", marginBottom: "24px", width: "100%", maxWidth: "760px", marginInline: "auto" }}
         >
           <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.25em", color: "#00D2FF", textTransform: "uppercase", display: "block", marginBottom: "20px" }}>
-            The Work
+            {locale === "es" ? "Proyectos" : "The Work"}
           </span>
           <h2
             style={{
@@ -147,7 +154,7 @@ export default function PageCTAWork() {
               marginBottom: "20px",
             }}
           >
-            Engineering that{" "}
+            {locale === "es" ? "Ingeniería que" : "Engineering that"}{" "}
             <span
               style={{
                 background: "linear-gradient(135deg, #00D2FF, #3a7bd5)",
@@ -156,14 +163,16 @@ export default function PageCTAWork() {
                 backgroundClip: "text",
               }}
             >
-              ships.
+              {locale === "es" ? "entrega." : "ships."}
             </span>
           </h2>
           <p style={{ fontSize: "1.05rem", color: "rgba(255,255,255,0.4)", maxWidth: "520px", margin: "0 auto 40px", lineHeight: 1.65 }}>
-            Explore the full portfolio — products built for performance, designed for conversion.
+            {locale === "es"
+              ? "Explorá el portfolio completo: productos creados para performance y conversión."
+              : "Explore the full portfolio — products built for performance, designed for conversion."}
           </p>
           <MagneticButton href="/work" size="lg">
-            Explore our work
+            {locale === "es" ? "Explorar proyectos" : "Explore our work"}
             <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>

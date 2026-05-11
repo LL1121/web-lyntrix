@@ -4,14 +4,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useAnimate } from "framer-motion";
 import { Check, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useDictionary } from "@/lib/use-locale";
 
 interface FieldState { focused: boolean; error: string; }
-
-const FIELDS = [
-  { name: "name"    as const, placeholder: "Your name",                    multiline: false },
-  { name: "email"   as const, placeholder: "your@email.com",               multiline: false },
-  { name: "message" as const, placeholder: "Tell us about your project...", multiline: true  },
-];
 
 // ── Particle explosion on canvas ───────────────────────────────────────────
 function useParticleExplosion() {
@@ -73,6 +68,7 @@ function useParticleExplosion() {
 }
 
 export default function Contact() {
+  const dict = useDictionary();
   const router = useRouter();
   const [fieldStates, setFieldStates] = useState<Record<string, FieldState>>({
     name:    { focused: false, error: "" },
@@ -98,9 +94,9 @@ export default function Contact() {
     const email   = (data.get("email")   as string).trim();
     const message = (data.get("message") as string).trim();
     let ok = true;
-    if (!name)                                            { update("name",    { error: "Name is required" });           ok = false; } else update("name",    { error: "" });
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { update("email",   { error: "Valid email required" });       ok = false; } else update("email",   { error: "" });
-    if (!message)                                         { update("message", { error: "Message is required" });        ok = false; } else update("message", { error: "" });
+    if (!name)                                            { update("name",    { error: dict.contact.errors.name });      ok = false; } else update("name",    { error: "" });
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { update("email",   { error: dict.contact.errors.email });     ok = false; } else update("email",   { error: "" });
+    if (!message)                                         { update("message", { error: dict.contact.errors.message });   ok = false; } else update("message", { error: "" });
     return ok ? { name, email, message } : null;
   };
 
@@ -163,7 +159,7 @@ export default function Contact() {
 
     // Wait for API (if still pending) before navigating
     const res = await apiPromise;
-    if (res && !res.ok) setApiError("Message failed to send. Please try again.");
+    if (res && !res.ok) setApiError(dict.contact.apiError);
 
     // ── PHASE 5: Navigate home ───────────────────────────────────────────
     setPhase("done");
@@ -253,15 +249,15 @@ export default function Contact() {
           transition={{ duration: 0.5 }}
           style={{ textAlign: "center", marginBottom: "56px" }}
         >
-          <span style={{ display: "block", fontSize: "11px", fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "#00D2FF", marginBottom: "14px" }}>Signal</span>
+            <span style={{ display: "block", fontSize: "11px", fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase" as const, color: "#00D2FF", marginBottom: "14px" }}>{dict.contact.kicker}</span>
           <h2 style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 700, letterSpacing: "-0.02em", color: "white", marginBottom: "14px" }}>
-            Let&apos;s build{" "}
+            {dict.contact.titlePrefix}{" "}
             <span style={{ background: "linear-gradient(135deg, #00D2FF, #3a7bd5)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-              together
+              {dict.contact.titleHighlight}
             </span>
           </h2>
           <p style={{ fontSize: "0.9375rem", color: "rgba(255,255,255,0.38)", lineHeight: 1.6 }}>
-            Ready to elevate your digital presence? Drop us a signal.
+            {dict.contact.description}
           </p>
         </motion.div>
 
@@ -284,7 +280,11 @@ export default function Contact() {
           transition={{ duration: 0.5, delay: 0.1 }}
           style={{ display: "flex", flexDirection: "column", gap: "14px" }}
         >
-          {FIELDS.map(({ name, placeholder, multiline }) => {
+          {[
+            { name: "name" as const, placeholder: dict.contact.placeholders.name, multiline: false },
+            { name: "email" as const, placeholder: dict.contact.placeholders.email, multiline: false },
+            { name: "message" as const, placeholder: dict.contact.placeholders.message, multiline: true },
+          ].map(({ name, placeholder, multiline }) => {
             const state = fieldStates[name];
             const borderColor = state.error ? "rgba(248,113,113,0.55)" : state.focused ? "rgba(0,210,255,0.45)" : "rgba(255,255,255,0.1)";
             const sharedStyle: React.CSSProperties = {
@@ -334,7 +334,7 @@ export default function Contact() {
             onMouseEnter={(e) => { if (!isAnimating) (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 40px rgba(0,210,255,0.22)"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "none"; }}
           >
-            {phase === "idle" && <>Send signal <span ref={btnScope}><Send style={{ width: "16px", height: "16px" }} /></span></>}
+            {phase === "idle" && <>{dict.contact.submit} <span ref={btnScope}><Send style={{ width: "16px", height: "16px" }} /></span></>}
             {phase === "launching" && <span ref={btnScope}><Send style={{ width: "18px", height: "18px" }} /></span>}
             {phase === "particles" && <span style={{ opacity: 0 }}>·</span>}
             {(phase === "flash" || phase === "done") && <span style={{ opacity: 0 }}>·</span>}

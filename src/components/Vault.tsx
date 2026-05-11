@@ -1,46 +1,159 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import { useLenisInstance } from "@/lib/lenis-context";
+import { useDictionary, useLocale } from "@/lib/use-locale";
 
-const projects = [
+const projectsEn = [
   {
-    title: "Neural Commerce",
-    category: "AI / E-Commerce",
+    title: "Irrigacion File Manager",
+    category: "Next.js / Python / Workflow",
     description:
-      "AI-powered recommendation engine that increased conversion by 340% for a leading retail platform.",
+      "Platform for oil and mining companies to upload compliance files, with a dedicated approval dashboard for Irrigacion staff to review and validate water-delivery documentation.",
     gradient: "linear-gradient(135deg, #0c1445 0%, #1a0a2e 50%, #0d1b3e 100%)",
     accent: "#00D2FF",
-    year: "2025",
+    year: "2026",
+    screenshot: "",
+    liveUrl: "",
+    repoUrl: "",
   },
   {
-    title: "CloudVault Pro",
-    category: "Cloud / SaaS",
+    title: "Expedientes Desktop Manager",
+    category: "Tauri / Rust / PostgreSQL",
     description:
-      "Enterprise cloud management dashboard serving 50k+ users with real-time infrastructure monitoring.",
+      "Desktop case-management system built with Tauri and Rust, connected to PostgreSQL for secure record handling, searchability, and faster day-to-day legal/administrative operations.",
     gradient: "linear-gradient(135deg, #0a192f 0%, #112240 50%, #0a1628 100%)",
     accent: "#3a7bd5",
     year: "2025",
+    screenshot: "",
+    liveUrl: "",
+    repoUrl: "",
   },
   {
-    title: "Synthwave AI",
-    category: "AI / Generative",
+    title: "WhatsApp Automation Hub",
+    category: "Node.js / WhatsApp API / React",
     description:
-      "Generative AI platform for creating production-ready marketing assets in seconds.",
+      "End-to-end messaging solution: Node.js bot integrated with WhatsApp API plus a React operator panel backed by database persistence for live message exchange and conversation tracking.",
     gradient: "linear-gradient(135deg, #1a0533 0%, #0d1b3e 50%, #150a2e 100%)",
     accent: "#00D2FF",
     year: "2024",
+    screenshot: "",
+    liveUrl: "",
+    repoUrl: "",
   },
   {
-    title: "FlowOps",
-    category: "Automation / DevOps",
+    title: "Oilfield Data Capture System",
+    category: "Django / PostgreSQL / Ops",
     description:
-      "Intelligent CI/CD orchestration platform that reduced deployment time by 85% across 200+ microservices.",
+      "Full-stack Django solution used by oilfield operators to register operational field data and automatically route submissions to Irrigacion processes, reducing manual reporting overhead.",
     gradient: "linear-gradient(135deg, #001a1a 0%, #0a2530 50%, #051520 100%)",
     accent: "#3a7bd5",
     year: "2024",
+    screenshot: "",
+    liveUrl: "",
+    repoUrl: "",
+  },
+  {
+    title: "Malargue Local Guide",
+    category: "React / PHP / Directory Platform",
+    description:
+      "Local business discovery platform for tourists and residents, aggregating commerce profiles with search and navigation to increase visibility for Malargue merchants.",
+    gradient: "linear-gradient(135deg, #141224 0%, #1d1638 50%, #0f1122 100%)",
+    accent: "#00D2FF",
+    year: "2023",
+    screenshot: "",
+    liveUrl: "",
+    repoUrl: "",
+  },
+  {
+    title: "Objective & Productivity Tracker",
+    category: "Internal Tool / Performance",
+    description:
+      "Internal objective-management platform for Irrigacion teams where employees log and track goals while leadership monitors productivity metrics through dedicated management views.",
+    gradient: "linear-gradient(135deg, #121212 0%, #1a2233 55%, #121827 100%)",
+    accent: "#3a7bd5",
+    year: "2025",
+    screenshot: "",
+    liveUrl: "",
+    repoUrl: "",
+  },
+];
+
+const projectsEs = [
+  {
+    title: "Gestor de Archivos de Irrigacion",
+    category: "Next.js / Python / Flujo de trabajo",
+    description:
+      "Plataforma para que empresas petroleras y mineras carguen documentación, con panel de aprobación para personal de Irrigacion que revisa y valida entregas de agua.",
+    gradient: "linear-gradient(135deg, #0c1445 0%, #1a0a2e 50%, #0d1b3e 100%)",
+    accent: "#00D2FF",
+    year: "2026",
+    screenshot: "",
+    liveUrl: "",
+    repoUrl: "",
+  },
+  {
+    title: "Gestor de Expedientes de Escritorio",
+    category: "Tauri / Rust / PostgreSQL",
+    description:
+      "Sistema de gestión de expedientes de escritorio construido con Tauri y Rust, conectado a PostgreSQL para manejo seguro de registros, búsqueda rápida y operación diaria más eficiente.",
+    gradient: "linear-gradient(135deg, #0a192f 0%, #112240 50%, #0a1628 100%)",
+    accent: "#3a7bd5",
+    year: "2025",
+    screenshot: "",
+    liveUrl: "",
+    repoUrl: "",
+  },
+  {
+    title: "Centro de Automatización WhatsApp",
+    category: "Node.js / API de WhatsApp / React",
+    description:
+      "Solución integral de mensajería: bot en Node.js integrado con API de WhatsApp y panel de operadores en React con persistencia en base de datos para seguimiento de conversaciones en tiempo real.",
+    gradient: "linear-gradient(135deg, #1a0533 0%, #0d1b3e 50%, #150a2e 100%)",
+    accent: "#00D2FF",
+    year: "2024",
+    screenshot: "",
+    liveUrl: "",
+    repoUrl: "",
+  },
+  {
+    title: "Sistema de Carga de Datos Petroleros",
+    category: "Django / PostgreSQL / Operaciones",
+    description:
+      "Solución full-stack en Django utilizada por operarios petroleros para registrar datos de campo y enviarlos automáticamente a procesos de Irrigacion, reduciendo carga operativa manual.",
+    gradient: "linear-gradient(135deg, #001a1a 0%, #0a2530 50%, #051520 100%)",
+    accent: "#3a7bd5",
+    year: "2024",
+    screenshot: "",
+    liveUrl: "",
+    repoUrl: "",
+  },
+  {
+    title: "Guía Local Malargüe",
+    category: "React / PHP / Plataforma de Directorio",
+    description:
+      "Plataforma de descubrimiento de comercios para turistas y residentes, que agrupa negocios locales con búsqueda y navegación para aumentar la visibilidad de emprendedores en Malargüe.",
+    gradient: "linear-gradient(135deg, #141224 0%, #1d1638 50%, #0f1122 100%)",
+    accent: "#00D2FF",
+    year: "2023",
+    screenshot: "",
+    liveUrl: "",
+    repoUrl: "",
+  },
+  {
+    title: "Gestor de Objetivos y Productividad",
+    category: "Herramienta Interna / Performance",
+    description:
+      "Plataforma interna de objetivos para equipos de Irrigacion donde empleados cargan y marcan metas, mientras jefatura monitorea indicadores de productividad en paneles dedicados.",
+    gradient: "linear-gradient(135deg, #121212 0%, #1a2233 55%, #121827 100%)",
+    accent: "#3a7bd5",
+    year: "2025",
+    screenshot: "",
+    liveUrl: "",
+    repoUrl: "",
   },
 ];
 
@@ -49,6 +162,9 @@ const CARD_GAP = 20;
 const SIDE_PADDING = 64;
 
 export default function Vault() {
+  const dict = useDictionary();
+  const locale = useLocale();
+  const projects = locale === "es" ? projectsEs : projectsEn;
   const { lenis } = useLenisInstance();
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -253,7 +369,7 @@ export default function Vault() {
                 marginBottom: "14px",
               }}
             >
-              The Vault
+              {dict.vault.kicker}
             </span>
             <h2
               style={{
@@ -263,7 +379,7 @@ export default function Vault() {
                 color: "white",
               }}
             >
-              Selected{" "}
+              {dict.vault.titlePrefix}{" "}
               <span
                 style={{
                   background: "linear-gradient(135deg, #00D2FF, #3a7bd5)",
@@ -272,7 +388,7 @@ export default function Vault() {
                   backgroundClip: "text",
                 }}
               >
-                work
+                {dict.vault.titleHighlight}
               </span>
             </h2>
           </div>
@@ -312,7 +428,7 @@ export default function Vault() {
               )}
             </AnimatePresence>
             <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.25)" }} className="hidden md:block">
-              {isActive ? "Scrolling horizontally" : "Scroll to explore →"}
+              {isActive ? dict.vault.activeHint : dict.vault.idleHint}
             </span>
           </div>
         </motion.div>
@@ -369,6 +485,20 @@ export default function Vault() {
                   overflow: "hidden",
                 }}
               >
+                {project.screenshot ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={project.screenshot}
+                    alt={`${project.title} screenshot`}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : null}
                 {/* Grid pattern */}
                 <div
                   style={{
@@ -376,6 +506,7 @@ export default function Vault() {
                     inset: 0,
                     backgroundImage: `linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)`,
                     backgroundSize: "40px 40px",
+                    opacity: project.screenshot ? 0.26 : 1,
                   }}
                 />
                 {/* Glow */}
@@ -390,6 +521,7 @@ export default function Vault() {
                     borderRadius: "50%",
                     background: `${project.accent}35`,
                     filter: "blur(32px)",
+                    opacity: project.screenshot ? 0.65 : 1,
                   }}
                   whileHover={{ scale: 1.5, opacity: 0.95 }}
                 />
@@ -470,6 +602,48 @@ export default function Vault() {
                 >
                   {project.description}
                 </p>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "14px" }}>
+                  {project.liveUrl ? (
+                    <a
+                      href={project.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        color: "white",
+                        textDecoration: "none",
+                        border: "1px solid rgba(255,255,255,0.2)",
+                        borderRadius: "999px",
+                        padding: "6px 10px",
+                        background: "rgba(255,255,255,0.05)",
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {dict.vault.liveSite}
+                    </a>
+                  ) : null}
+                  {project.repoUrl ? (
+                    <a
+                      href={project.repoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        color: "rgba(255,255,255,0.82)",
+                        textDecoration: "none",
+                        border: "1px solid rgba(255,255,255,0.14)",
+                        borderRadius: "999px",
+                        padding: "6px 10px",
+                        background: "rgba(255,255,255,0.03)",
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {dict.vault.repository}
+                    </a>
+                  ) : null}
+                </div>
               </div>
             </motion.div>
           ))}
@@ -500,7 +674,7 @@ export default function Vault() {
             }}
           >
             <span style={{ fontSize: "11px", color: "rgba(0,210,255,0.8)", fontWeight: 500, letterSpacing: "0.05em" }}>
-              ← Scroll to navigate projects →
+              {dict.vault.navHint}
             </span>
           </motion.div>
         )}
@@ -548,6 +722,20 @@ export default function Vault() {
                   borderBottom: "1px solid rgba(255,255,255,0.08)",
                 }}
               >
+                {selectedProject.screenshot ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={selectedProject.screenshot}
+                    alt={`${selectedProject.title} screenshot`}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : null}
                 <div
                   style={{
                     position: "absolute",
@@ -555,6 +743,7 @@ export default function Vault() {
                     backgroundImage:
                       "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
                     backgroundSize: "40px 40px",
+                    opacity: selectedProject.screenshot ? 0.24 : 1,
                   }}
                 />
                 <div
@@ -611,8 +800,50 @@ export default function Vault() {
                   {selectedProject.description}
                 </p>
                 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                  <a
-                    href="/contact"
+                  {selectedProject.liveUrl ? (
+                    <a
+                      href={selectedProject.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "12px 18px",
+                        borderRadius: "999px",
+                        background: "linear-gradient(135deg, #00D2FF, #3a7bd5)",
+                        color: "white",
+                        textDecoration: "none",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {dict.vault.liveSite}
+                    </a>
+                  ) : null}
+                  {selectedProject.repoUrl ? (
+                    <a
+                      href={selectedProject.repoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "12px 18px",
+                        borderRadius: "999px",
+                        border: "1px solid rgba(255,255,255,0.16)",
+                        color: "rgba(255,255,255,0.86)",
+                        textDecoration: "none",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {dict.vault.repository}
+                    </a>
+                  ) : null}
+                  <Link
+                    href={`/${locale}/contact`}
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -626,10 +857,10 @@ export default function Vault() {
                       fontWeight: 600,
                     }}
                   >
-                    Start similar project
-                  </a>
-                  <a
-                    href="/contact"
+                    {dict.vault.modalPrimary}
+                  </Link>
+                  <Link
+                    href={`/${locale}/contact`}
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -643,8 +874,8 @@ export default function Vault() {
                       fontWeight: 600,
                     }}
                   >
-                    Request case study
-                  </a>
+                    {dict.vault.modalSecondary}
+                  </Link>
                 </div>
               </div>
             </motion.div>

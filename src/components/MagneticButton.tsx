@@ -2,6 +2,8 @@
 
 import { useRef } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+import { usePathname } from "next/navigation";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
 
 interface MagneticButtonProps {
   href: string;
@@ -18,6 +20,10 @@ export default function MagneticButton({
   size = "md",
   style,
 }: MagneticButtonProps) {
+  const pathname = usePathname();
+  const segments = pathname.split("/").filter(Boolean);
+  const locale = segments[0] && isLocale(segments[0]) ? segments[0] : DEFAULT_LOCALE;
+  const resolvedHref = href.startsWith("/") ? `/${locale}${href}` : href;
   const ref = useRef<HTMLAnchorElement>(null);
   const x   = useMotionValue(0);
   const y   = useMotionValue(0);
@@ -40,7 +46,7 @@ export default function MagneticButton({
   return (
     <motion.a
       ref={ref}
-      href={href}
+      href={resolvedHref}
       style={{
         display: "inline-flex",
         alignItems: "center",

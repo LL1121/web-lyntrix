@@ -3,6 +3,7 @@
 import React from "react";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { useDictionary } from "@/lib/use-locale";
 const XIcon = () => (
   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.75l7.733-8.835L1.254 2.25H8.08l4.26 5.632L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
@@ -21,13 +22,28 @@ const GithubIcon = () => (
   </svg>
 );
 
+const InstagramIcon = () => (
+  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+    <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.8A3.95 3.95 0 0 0 3.8 7.75v8.5a3.95 3.95 0 0 0 3.95 3.95h8.5a3.95 3.95 0 0 0 3.95-3.95v-8.5a3.95 3.95 0 0 0-3.95-3.95h-8.5zm8.95 1.4a1.15 1.15 0 1 1 0 2.3 1.15 1.15 0 0 1 0-2.3zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.8A3.2 3.2 0 1 0 12 15.2 3.2 3.2 0 0 0 12 8.8z" />
+  </svg>
+);
+
+const TiktokIcon = () => (
+  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.13h-3.2v12.58a2.87 2.87 0 1 1-1.98-2.73V9.12a6.08 6.08 0 1 0 5.19 6.02V8.76a8.06 8.06 0 0 0 4.7 1.5V6.69h-.94z" />
+  </svg>
+);
+
 const socials: { label: string; icon: () => React.JSX.Element; href: string }[] = [
   { label: "X", icon: XIcon, href: "#" },
   { label: "LinkedIn", icon: LinkedinIcon, href: "#" },
   { label: "GitHub", icon: GithubIcon, href: "#" },
+  { label: "Instagram", icon: InstagramIcon, href: "#" },
+  { label: "TikTok", icon: TiktokIcon, href: "#" },
 ];
 
 export default function Footer() {
+  const dict = useDictionary();
   const year = new Date().getFullYear();
   const footerRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -56,7 +72,7 @@ export default function Footer() {
       className="relative"
       style={{
         marginTop: "56px",
-        padding: "56px 0 44px",
+        padding: "56px 0 12px",
         borderTop: "1px solid rgba(255,255,255,0.08)",
         background:
           "linear-gradient(180deg, rgba(255,255,255,0.015) 0%, rgba(255,255,255,0.004) 28%, transparent 100%)",
@@ -91,27 +107,17 @@ export default function Footer() {
             }}
           >
             <div>
-              <div
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo.png"
+                alt="Lyntrix"
                 style={{
-                  fontSize: "26px",
-                  fontWeight: 800,
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1,
-                  color: "white",
+                  height: "28px",
+                  width: "auto",
+                  display: "block",
+                  filter: "invert(1) hue-rotate(180deg)",
                 }}
-              >
-                Lyn
-                <span
-                  style={{
-                    background: "linear-gradient(135deg, #00D2FF, #3a7bd5)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                  }}
-                >
-                  trix
-                </span>
-              </div>
+              />
               <p
                 style={{
                   marginTop: "12px",
@@ -121,8 +127,7 @@ export default function Footer() {
                   color: "rgba(255,255,255,0.42)",
                 }}
               >
-                We design and engineer high-fidelity digital products for teams that need speed,
-                clarity, and measurable business impact.
+                {dict.footer.description}
               </p>
             </div>
 
@@ -159,10 +164,10 @@ export default function Footer() {
 
           <div
             className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
-            style={{ marginTop: "70px" }}
+            style={{ marginTop: "18px" }}
           >
             <div className="flex flex-wrap gap-x-6 gap-y-2">
-              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
+              {[dict.footer.privacy, dict.footer.terms, dict.footer.cookies].map((item) => (
                 <a
                   key={item}
                   href="#"
@@ -186,7 +191,7 @@ export default function Footer() {
             >
               <span>© {year} Lyntrix</span>
               <span style={{ opacity: 0.35 }}>•</span>
-              <span>Crafted with precision.</span>
+              <span>{dict.footer.crafted}</span>
             </div>
           </div>
       </div>

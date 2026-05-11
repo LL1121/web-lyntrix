@@ -2,41 +2,25 @@
 
 import { motion } from "framer-motion";
 import { Brain, Globe, Cloud, Zap, Code2, Shield } from "lucide-react";
-
-const smallCards = [
-  {
-    icon: Globe,
-    title: "Web Development",
-    description: "High-fidelity web experiences. Performance-obsessed, pixel-perfect execution.",
-    accent: "#3a7bd5",
-  },
-  {
-    icon: Cloud,
-    title: "Cloud Architecture",
-    description: "Scalable infrastructure for tomorrow. AWS, GCP and beyond.",
-    accent: "#00D2FF",
-  },
-  {
-    icon: Code2,
-    title: "Custom Software",
-    description: "Bespoke applications engineered from the ground up for your unique logic.",
-    accent: "#3a7bd5",
-  },
-  {
-    icon: Zap,
-    title: "Automation",
-    description: "End-to-end workflows that eliminate friction and accelerate growth.",
-    accent: "#00D2FF",
-  },
-  {
-    icon: Shield,
-    title: "Security & DevOps",
-    description: "Hardened deployments with CI/CD excellence. Secure and reliable at scale.",
-    accent: "#3a7bd5",
-  },
-];
+import { useLocale } from "@/lib/use-locale";
 
 export default function Services() {
+  const locale = useLocale();
+  const smallCards = locale === "es"
+    ? [
+        { icon: Globe, title: "Desarrollo Web", description: "Experiencias web de alta fidelidad. Performance obsesiva y ejecución pixel-perfect.", accent: "#3a7bd5" },
+        { icon: Cloud, title: "Arquitectura Cloud", description: "Infraestructura escalable para mañana. AWS, GCP y más.", accent: "#00D2FF" },
+        { icon: Code2, title: "Software a Medida", description: "Aplicaciones diseñadas desde cero para la lógica única de tu negocio.", accent: "#3a7bd5" },
+        { icon: Zap, title: "Automatización", description: "Flujos end-to-end que eliminan fricción y aceleran el crecimiento.", accent: "#00D2FF" },
+        { icon: Shield, title: "Seguridad y DevOps", description: "Despliegues robustos con excelencia CI/CD. Seguro y confiable a escala.", accent: "#3a7bd5" },
+      ]
+    : [
+        { icon: Globe, title: "Web Development", description: "High-fidelity web experiences. Performance-obsessed, pixel-perfect execution.", accent: "#3a7bd5" },
+        { icon: Cloud, title: "Cloud Architecture", description: "Scalable infrastructure for tomorrow. AWS, GCP and beyond.", accent: "#00D2FF" },
+        { icon: Code2, title: "Custom Software", description: "Bespoke applications engineered from the ground up for your unique logic.", accent: "#3a7bd5" },
+        { icon: Zap, title: "Automation", description: "End-to-end workflows that eliminate friction and accelerate growth.", accent: "#00D2FF" },
+        { icon: Shield, title: "Security & DevOps", description: "Hardened deployments with CI/CD excellence. Secure and reliable at scale.", accent: "#3a7bd5" },
+      ];
   return (
     <section id="services" style={{ position: "relative", padding: "96px 0" }}>
       <div
@@ -71,7 +55,7 @@ export default function Services() {
               marginBottom: "14px",
             }}
           >
-            The Stack
+            {locale === "es" ? "El Stack" : "The Stack"}
           </span>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
             <h2
@@ -82,7 +66,7 @@ export default function Services() {
                 color: "white",
               }}
             >
-              What we{" "}
+              {locale === "es" ? "Lo que" : "What we"}{" "}
               <span
                 style={{
                   background: "linear-gradient(135deg, #00D2FF, #3a7bd5)",
@@ -91,14 +75,14 @@ export default function Services() {
                   backgroundClip: "text",
                 }}
               >
-                deliver
+                {locale === "es" ? "entregamos" : "deliver"}
               </span>
             </h2>
             <span
               style={{ fontSize: "13px", color: "rgba(255,255,255,0.22)" }}
               className="hidden md:block"
             >
-              6 core capabilities
+              {locale === "es" ? "6 capacidades clave" : "6 core capabilities"}
             </span>
           </div>
         </motion.div>
@@ -163,7 +147,7 @@ export default function Services() {
                   />
                 </div>
                 <h3 style={{ fontSize: "clamp(1.2rem, 2.5vw, 1.5rem)", fontWeight: 700, color: "white" }}>
-                  Artificial Intelligence
+                  {locale === "es" ? "Inteligencia Artificial" : "Artificial Intelligence"}
                 </h3>
               </div>
 
@@ -197,9 +181,9 @@ export default function Services() {
                 maxWidth: "680px",
               }}
             >
-              Custom LLMs, computer vision, RAG pipelines and intelligent automation that
-              transform raw data into compounding business advantage. From model training to
-              production deployment.
+              {locale === "es"
+                ? "LLMs personalizados, visión por computadora, pipelines RAG y automatización inteligente que convierten datos en ventaja competitiva. Desde entrenamiento de modelos hasta despliegue productivo."
+                : "Custom LLMs, computer vision, RAG pipelines and intelligent automation that transform raw data into compounding business advantage. From model training to production deployment."}
             </p>
           </div>
         </motion.div>

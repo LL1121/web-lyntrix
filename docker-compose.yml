@@ -1,0 +1,15 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    # Variables: copiá `.env.example` → `.env` en esta carpeta.
+    # Compose lee `.env` y sustituye ${...} abajo; llegan al contenedor como env de Node/Next.
+    environment:
+      NODE_ENV: production
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      CONTACT_EMAIL: ${CONTACT_EMAIL:-}
+      PORT: ${PORT:-3000}
