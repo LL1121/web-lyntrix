@@ -1,15 +1,12 @@
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "${HOST_PORT:-3000}:3000"
+    build: .
+    container_name: web_lyntrix
     restart: unless-stopped
-    # Variables: copiá `.env.example` → `.env` en esta carpeta.
-    # Compose lee `.env` y sustituye ${...} abajo; llegan al contenedor como env de Node/Next.
-    environment:
-      NODE_ENV: production
-      RESEND_API_KEY: ${RESEND_API_KEY:-}
-      CONTACT_EMAIL: ${CONTACT_EMAIL:-}
-      PORT: ${PORT:-3000}
+    env_file: .env
+    networks:
+      - proxy_net
+
+networks:
+  proxy_net:
+    external: true
